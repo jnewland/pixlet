@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -28,25 +27,29 @@ func (b *Browser) pushHandler(w http.ResponseWriter, r *http.Request) {
 		background     bool
 	)
 
-	// Parse the request form so we can use it as config values.
-	if err := r.ParseMultipartForm(100); err != nil {
-		log.Printf("form parsing failed: %+v", err)
-		http.Error(w, "bad form data", http.StatusBadRequest)
+	var result map[string]interface{}
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(500)
+		fmt.Fprintln(w, err)
 		return
 	}
+
+	json.Unmarshal(bodyBytes, &result)
+
 	config := make(map[string]string)
-	for k, val := range r.Form {
+	for k, val := range result {
 		switch k {
 		case "deviceID":
-			deviceID = val[0]
+			deviceID = val.(string)
 		case "apiToken":
-			apiToken = val[0]
+			apiToken = val.(string)
 		case "installationID":
-			installationID = val[0]
+			installationID = val.(string)
 		case "background":
-			background = val[0] == "true"
+			background = val.(string) == "true"
 		default:
-			config[k] = val[0]
+			config[k] = val.(string)
 		}
 	}
 
