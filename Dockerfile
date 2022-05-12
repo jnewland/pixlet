@@ -7,5 +7,6 @@ ENTRYPOINT ["/pixlet"]
 RUN apt update && apt install -y \
   ca-certificates \
   libwebp-dev \
+  tzdata \
   && apt clean
 COPY ./build/${TARGETOS}_${TARGETARCH}/pixlet /pixlet
